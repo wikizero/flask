@@ -1,5 +1,5 @@
-from flask import Flask, jsonify
-# from blog.db import init_db, get_db
+from flask import Flask
+from server.db import init_db, get_db
 
 
 def create_app():
@@ -12,16 +12,14 @@ def create_app():
     @app.route('/hello')
     def hello():
         return 'Hello, flask!'
-        # db = get_db()
-        # return jsonify({'msg': list(db.db.test.find({}))})
 
     @app.errorhandler(404)
-    def hello():
-        return 'Are you lost?'
+    def page_not_found(e):
+        return 'Are you lost?', 404
 
     @app.errorhandler(500)
-    def hello():
-        return "We're sorry. Something went wrong. Please try again later. The backend responded with an error!"
+    def server_error(e):
+        return "We're sorry. Something went wrong. Please try again later. The backend responded with an error!", 500
 
     # register the database commands
     # init_db()
