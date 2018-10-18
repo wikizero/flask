@@ -92,7 +92,7 @@ def sex_rate(data: list):
     pie.render()
 
 
-friends_map(provinces)
+# friends_map(provinces)
 
 # word_cloud('签名词云', signatures)
 
@@ -101,3 +101,4 @@ friends_map(provinces)
 # 群组信息
 # 整理好友
 # 知道哪些好友拉黑我
+

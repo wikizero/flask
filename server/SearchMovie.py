@@ -32,3 +32,16 @@ https://github.com/SpiderClub/haipproxy
 最新电影
 https://movie.douban.com/cinema/nowplaying/shenzhen/
 '''
+
+
+def func(name: str):
+    """
+    xxx
+    :param name:
+    :return:
+    """
+    if not isinstance(name, str):
+        raise Exception('not a str')
+
+
+func('str')
