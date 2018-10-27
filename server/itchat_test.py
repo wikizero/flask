@@ -1,11 +1,12 @@
 import re
+import time
 import itchat
 from itchat.content import *
 from pathlib import Path
 from pprint import pprint
 from datetime import datetime
+from .dbHelper import mongo
 
-msg_information = {}
 face_bug = None  # 针对表情包的内容
 folder = 'files'
 
@@ -82,7 +83,7 @@ def handle_receive_msg(msg):
 
     face_bug = msg_content
     data = {
-        'id': msg_id,
+        '_id': msg_id,
         'msg': msg_content,
         'url': msg_share_url,
         'time': str(datetime.fromtimestamp(msg_time)),
@@ -93,14 +94,8 @@ def handle_receive_msg(msg):
         'sex': sex,
         'remark_name': remark_name,
     }
-    # 将信息存储在字典中，每一个msg_id对应一条信息
-    msg_information.update(
-        {
-            msg_id: data
-        }
-    )
-    pprint(data)
-    print('-' * 100)
+    # save in db
+    mongo.insert_one(data)
 
 
 # 这个是用于监听是否有消息撤回
@@ -109,13 +104,14 @@ def information(msg):
     # 这里如果这里的msg['Content']中包含消息撤回和id，就执行下面的语句
     if '撤回了一条消息' in msg['Content']:
         old_msg_id = re.search("\<msgid\>(.*?)\<\/msgid\>", msg['Content']).group(1)  # 在返回的content查找撤回的消息的id
-        old_msg = msg_information.get(old_msg_id)  # 得到消息
-        print('*' * 50)
-        print('撤回一条消息...')
-        old_msg.update(revoke=True)
-        pprint(old_msg)
-        print('*' * 50)
-        msg_information.update(old_msg_id=old_msg)
+        old_msg = None
+        while not old_msg:
+            # 可能消息还没存到数据库，所以循环查
+            time.sleep(1)
+            old_msg = mongo.find_one({'_id': old_msg_id})
+
+        ret = mongo.update_one({'_id': old_msg_id}, {'revoke': True})
+        print(dict(ret))
 
 
 itchat.auto_login(hotReload=True)
